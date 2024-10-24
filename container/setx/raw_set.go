@@ -3,11 +3,7 @@ package setx
 // type RawSet[T comparable] = map[T]struct{}
 // Since RawSet is a go type, we cannot add methods to it.
 
-func NewRaw[T comparable]() map[T]struct{} {
-	return make(map[T]struct{})
-}
-
-func RawFromKey[T comparable, V any](in map[T]V) map[T]struct{} {
+func FromKey[T comparable, V any](in map[T]V) map[T]struct{} {
 	out := make(map[T]struct{}, len(in))
 	for k := range in {
 		out[k] = struct{}{}
@@ -15,7 +11,7 @@ func RawFromKey[T comparable, V any](in map[T]V) map[T]struct{} {
 	return out
 }
 
-func RawFromSlice[T comparable](in []T) map[T]struct{} {
+func FromSlice[T comparable](in []T) map[T]struct{} {
 	out := make(map[T]struct{}, len(in))
 	for _, v := range in {
 		out[v] = struct{}{}
@@ -23,11 +19,11 @@ func RawFromSlice[T comparable](in []T) map[T]struct{} {
 	return out
 }
 
-func RawFrom[T comparable](in ...T) map[T]struct{} {
-	return RawFromSlice(in)
+func From[T comparable](in ...T) map[T]struct{} {
+	return FromSlice(in)
 }
 
-func RawToSlice[T comparable](in map[T]struct{}) []T {
+func ToSlice[T comparable](in map[T]struct{}) []T {
 	out := make([]T, 0, len(in))
 	for k := range in {
 		out = append(out, k)
@@ -36,7 +32,7 @@ func RawToSlice[T comparable](in map[T]struct{}) []T {
 }
 
 // s & arr
-func RawIntersectSlice[T comparable](s map[T]struct{}, arr []T) map[T]struct{} {
+func IntersectSlice[T comparable](s map[T]struct{}, arr []T) map[T]struct{} {
 	out := make(map[T]struct{})
 	for _, v := range arr {
 		if _, ok := s[v]; ok {
@@ -47,7 +43,7 @@ func RawIntersectSlice[T comparable](s map[T]struct{}, arr []T) map[T]struct{} {
 }
 
 // s & other
-func RawIntersectSet[T comparable](s map[T]struct{}, other map[T]struct{}) map[T]struct{} {
+func IntersectSet[T comparable](s map[T]struct{}, other map[T]struct{}) map[T]struct{} {
 	out := make(map[T]struct{})
 	for k := range s {
 		if _, ok := other[k]; ok {
@@ -58,7 +54,7 @@ func RawIntersectSet[T comparable](s map[T]struct{}, other map[T]struct{}) map[T
 }
 
 // s - arr
-func RawSubtractSlice[T comparable](s map[T]struct{}, arr []T) map[T]struct{} {
+func SubtractSlice[T comparable](s map[T]struct{}, arr []T) map[T]struct{} {
 	out := make(map[T]struct{})
 	for k := range s {
 		out[k] = struct{}{}
@@ -70,7 +66,7 @@ func RawSubtractSlice[T comparable](s map[T]struct{}, arr []T) map[T]struct{} {
 }
 
 // s - other
-func RawSubtractSet[T comparable](s map[T]struct{}, other map[T]struct{}) map[T]struct{} {
+func SubtractSet[T comparable](s map[T]struct{}, other map[T]struct{}) map[T]struct{} {
 	out := make(map[T]struct{})
 	for k := range s {
 		out[k] = struct{}{}
@@ -82,7 +78,7 @@ func RawSubtractSet[T comparable](s map[T]struct{}, other map[T]struct{}) map[T]
 }
 
 // s | arr
-func RawUnionSlice[T comparable](s map[T]struct{}, arr []T) map[T]struct{} {
+func UnionSlice[T comparable](s map[T]struct{}, arr []T) map[T]struct{} {
 	out := make(map[T]struct{})
 	for k := range s {
 		out[k] = struct{}{}
@@ -94,7 +90,7 @@ func RawUnionSlice[T comparable](s map[T]struct{}, arr []T) map[T]struct{} {
 }
 
 // s | other
-func RawUnionSet[T comparable](s map[T]struct{}, other map[T]struct{}) map[T]struct{} {
+func UnionSet[T comparable](s map[T]struct{}, other map[T]struct{}) map[T]struct{} {
 	out := make(map[T]struct{})
 	for k := range s {
 		out[k] = struct{}{}
@@ -105,47 +101,59 @@ func RawUnionSet[T comparable](s map[T]struct{}, other map[T]struct{}) map[T]str
 	return out
 }
 
-// Merge arr into s, will modify s, return s
-func RawMergeSlice[T comparable](s map[T]struct{}, arrs ...[]T) map[T]struct{} {
-	for _, a := range arrs {
-		for _, v := range a {
-			s[v] = struct{}{}
+func Intersect[T comparable](a map[T]struct{}, b map[T]struct{}) map[T]struct{} {
+	return IntersectSet(a, b)
+}
+func Subtract[T comparable](a map[T]struct{}, b map[T]struct{}) map[T]struct{} {
+	return SubtractSet(a, b)
+}
+func Union[T comparable](a map[T]struct{}, b map[T]struct{}) map[T]struct{} {
+	return UnionSet(a, b)
+}
+
+func MergeAll[T comparable](sets ...map[T]struct{}) map[T]struct{} {
+	out := make(map[T]struct{})
+	for _, s := range sets {
+		for k := range s {
+			out[k] = struct{}{}
 		}
+	}
+	return out
+}
+
+// Merge arr into s, will modify s, return s
+func MergeSlice[T comparable](s map[T]struct{}, arr []T) map[T]struct{} {
+	for _, v := range arr {
+		s[v] = struct{}{}
 	}
 	return s
 }
 
 // Merge other into s, will modify s, return s
-func RawMergeSet[T comparable](s map[T]struct{}, others ...map[T]struct{}) map[T]struct{} {
-	for _, other := range others {
-		for k := range other {
-			s[k] = struct{}{}
-		}
+func MergeSet[T comparable](s map[T]struct{}, other map[T]struct{}) map[T]struct{} {
+	for k := range other {
+		s[k] = struct{}{}
 	}
 	return s
 }
 
 // Remove arr from s, will modify s, return s
-func RawRemoveSlice[T comparable](s map[T]struct{}, arrs ...[]T) map[T]struct{} {
-	for _, a := range arrs {
-		for _, v := range a {
-			delete(s, v)
-		}
+func RemoveSlice[T comparable](s map[T]struct{}, arr []T) map[T]struct{} {
+	for _, v := range arr {
+		delete(s, v)
 	}
 	return s
 }
 
 // Remove other from s, will modify s, return s
-func RawRemoveSet[T comparable](s map[T]struct{}, others ...map[T]struct{}) map[T]struct{} {
-	for _, other := range others {
-		for k := range other {
-			delete(s, k)
-		}
+func RemoveSet[T comparable](s map[T]struct{}, other map[T]struct{}) map[T]struct{} {
+	for k := range other {
+		delete(s, k)
 	}
 	return s
 }
 
-func RawEqual[T comparable](a map[T]struct{}, b map[T]struct{}) bool {
+func Equal[T comparable](a map[T]struct{}, b map[T]struct{}) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -157,7 +165,7 @@ func RawEqual[T comparable](a map[T]struct{}, b map[T]struct{}) bool {
 	return true
 }
 
-func RawCopy[T comparable](s map[T]struct{}) map[T]struct{} {
+func Copy[T comparable](s map[T]struct{}) map[T]struct{} {
 	out := make(map[T]struct{})
 	for k := range s {
 		out[k] = struct{}{}
@@ -165,17 +173,17 @@ func RawCopy[T comparable](s map[T]struct{}) map[T]struct{} {
 	return out
 }
 
-func RawHas[T comparable](s map[T]struct{}, v T) bool {
+func Has[T comparable](s map[T]struct{}, v T) bool {
 	_, ok := s[v]
 	return ok
 }
 
-func RawLen[T comparable](s map[T]struct{}) int      { return len(s) }
-func RawIsEmpty[T comparable](s map[T]struct{}) bool { return len(s) == 0 }
-func RawClear[T comparable](s map[T]struct{}) {
+func Len[T comparable](s map[T]struct{}) int      { return len(s) }
+func IsEmpty[T comparable](s map[T]struct{}) bool { return len(s) == 0 }
+func Clear[T comparable](s map[T]struct{}) {
 	for k := range s {
 		delete(s, k)
 	}
 }
-func RawAdd[T comparable](s map[T]struct{}, vs ...T) map[T]struct{} { return RawMergeSlice(s, vs) }
-func RawDel[T comparable](s map[T]struct{}, vs ...T) map[T]struct{} { return RawRemoveSlice(s, vs) }
+func Add[T comparable](s map[T]struct{}, vs ...T) map[T]struct{} { return MergeSlice(s, vs) }
+func Del[T comparable](s map[T]struct{}, vs ...T) map[T]struct{} { return RemoveSlice(s, vs) }
