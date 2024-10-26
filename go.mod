@@ -1,6 +1,6 @@
 module github.com/RyoJerryYu/go-utilx
 
-go 1.23.2
+go 1.22.3
 
 require (
 	github.com/stretchr/testify v1.9.0

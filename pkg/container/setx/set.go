@@ -1,7 +1,7 @@
 package setx
 
 import (
-	"github.com/RyoJerryYu/go-utilx/container/icontainer"
+	"github.com/RyoJerryYu/go-utilx/pkg/container/icontainer"
 )
 
 type Set[T comparable] map[T]struct{}
