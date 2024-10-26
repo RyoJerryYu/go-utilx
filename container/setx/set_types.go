@@ -10,7 +10,7 @@ type (
 	Int16Set      = Set[int16]
 	Int32Set      = Set[int32]
 	Int64Set      = Set[int64]
-	UintSet       = Set[uint]
+	UIntSet       = Set[uint]
 	UInt8Set      = Set[uint8]
 	UInt16Set     = Set[uint16]
 	UInt32Set     = Set[uint32]
@@ -31,12 +31,12 @@ func NewInt8() Int8Set             { return New[int8]() }
 func NewInt16() Int16Set           { return New[int16]() }
 func NewInt32() Int32Set           { return New[int32]() }
 func NewInt64() Int64Set           { return New[int64]() }
-func NewUint() UintSet             { return New[uint]() }
+func NewUInt() UIntSet             { return New[uint]() }
 func NewUInt8() UInt8Set           { return New[uint8]() }
 func NewUInt16() UInt16Set         { return New[uint16]() }
 func NewUInt32() UInt32Set         { return New[uint32]() }
 func NewUInt64() UInt64Set         { return New[uint64]() }
-func NewUintPtr() UIntPtrSet       { return New[uintptr]() }
+func NewUIntPtr() UIntPtrSet       { return New[uintptr]() }
 func NewByte() ByteSet             { return New[byte]() }
 func NewRune() RuneSet             { return New[rune]() }
 func NewFloat32() Float32Set       { return New[float32]() }
@@ -52,7 +52,7 @@ var (
 	_ icontainer.Container[int16]      = (Int16Set)(nil)
 	_ icontainer.Container[int32]      = (Int32Set)(nil)
 	_ icontainer.Container[int64]      = (Int64Set)(nil)
-	_ icontainer.Container[uint]       = (UintSet)(nil)
+	_ icontainer.Container[uint]       = (UIntSet)(nil)
 	_ icontainer.Container[uint8]      = (UInt8Set)(nil)
 	_ icontainer.Container[uint16]     = (UInt16Set)(nil)
 	_ icontainer.Container[uint32]     = (UInt32Set)(nil)
