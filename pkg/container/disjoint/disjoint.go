@@ -1,6 +1,6 @@
 package disjoint
 
-import "github.com/RyoJerryYu/go-utilx/container/slicex"
+import "github.com/RyoJerryYu/go-utilx/pkg/container/slicex"
 
 type DisjointSet struct {
 	// parents[idx] < 0 means the elements[idx] is a root of a set.

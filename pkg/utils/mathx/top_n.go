@@ -1,7 +1,7 @@
 package mathx
 
 import (
-	"github.com/RyoJerryYu/go-utilx/container/heapx"
+	"github.com/RyoJerryYu/go-utilx/pkg/container/heapx"
 )
 
 // Order is not guaranteed

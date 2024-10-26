@@ -1,6 +1,6 @@
 package slicex
 
-import "github.com/RyoJerryYu/go-utilx/container/icontainer"
+import "github.com/RyoJerryYu/go-utilx/pkg/container/icontainer"
 
 type RawSliceOperator[T comparable] struct{}
 

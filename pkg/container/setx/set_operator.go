@@ -1,6 +1,6 @@
 package setx
 
-import "github.com/RyoJerryYu/go-utilx/container/icontainer"
+import "github.com/RyoJerryYu/go-utilx/pkg/container/icontainer"
 
 type SetOperator[T comparable] struct{}
 
