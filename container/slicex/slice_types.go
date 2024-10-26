@@ -10,7 +10,7 @@ type (
 	Int16Slice      = Slice[int16]
 	Int32Slice      = Slice[int32]
 	Int64Slice      = Slice[int64]
-	UintSlice       = Slice[uint]
+	UIntSlice       = Slice[uint]
 	UInt8Slice      = Slice[uint8]
 	UInt16Slice     = Slice[uint16]
 	UInt32Slice     = Slice[uint32]
@@ -31,7 +31,7 @@ func NewInt8() Int8Slice             { return New[int8]() }
 func NewInt16() Int16Slice           { return New[int16]() }
 func NewInt32() Int32Slice           { return New[int32]() }
 func NewInt64() Int64Slice           { return New[int64]() }
-func NewUint() UintSlice             { return New[uint]() }
+func NewUInt() UIntSlice             { return New[uint]() }
 func NewUInt8() UInt8Slice           { return New[uint8]() }
 func NewUInt16() UInt16Slice         { return New[uint16]() }
 func NewUInt32() UInt32Slice         { return New[uint32]() }
@@ -52,7 +52,7 @@ var (
 	_ icontainer.Container[int16]      = (*Int16Slice)(nil)
 	_ icontainer.Container[int32]      = (*Int32Slice)(nil)
 	_ icontainer.Container[int64]      = (*Int64Slice)(nil)
-	_ icontainer.Container[uint]       = (*UintSlice)(nil)
+	_ icontainer.Container[uint]       = (*UIntSlice)(nil)
 	_ icontainer.Container[uint8]      = (*UInt8Slice)(nil)
 	_ icontainer.Container[uint16]     = (*UInt16Slice)(nil)
 	_ icontainer.Container[uint32]     = (*UInt32Slice)(nil)

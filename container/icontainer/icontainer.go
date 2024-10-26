@@ -22,7 +22,7 @@ type (
 	UInt16Container     = Container[uint16]
 	UInt32Container     = Container[uint32]
 	UInt64Container     = Container[uint64]
-	UintPtrContainer    = Container[uintptr]
+	UIntPtrContainer    = Container[uintptr]
 	ByteContainer       = Container[byte]
 	RuneContainer       = Container[rune]
 	Float32Container    = Container[float32]
