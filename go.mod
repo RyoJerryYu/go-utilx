@@ -6,6 +6,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c
+	google.golang.org/protobuf v1.36.0
 )
 
 require (
