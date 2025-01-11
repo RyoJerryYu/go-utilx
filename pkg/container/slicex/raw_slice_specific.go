@@ -41,17 +41,6 @@ func ElementEqual[T comparable](a []T, b []T) bool {
 	return true
 }
 
-func To[T any, I any](in []T, getValue func(T) I) []I {
-	out := make([]I, len(in))
-	for idx := range in {
-		out[idx] = getValue(in[idx])
-	}
-
-	return out
-}
-
-func ToAnys[T any](in []T) []any { return To(in, func(t T) any { return t }) }
-
 func min(a, b int) int {
 	if a < b {
 		return a
