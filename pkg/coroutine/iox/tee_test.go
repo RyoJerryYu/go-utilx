@@ -1,4 +1,4 @@
-package syncx
+package iox
 
 import (
 	"context"

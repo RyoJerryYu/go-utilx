@@ -1,10 +1,12 @@
-package syncx
+package iox
 
 import (
 	"bytes"
 	"context"
 	"errors"
 	"io"
+
+	"github.com/RyoJerryYu/go-utilx/pkg/coroutine/syncx"
 )
 
 type ConsumeReaderFunc func(ctx context.Context, reader io.Reader) error
@@ -28,7 +30,7 @@ func ReaderTee(ctx context.Context, in io.Reader, mainFunc ConsumeReaderFunc, te
 		teeWriters[i] = writer
 	}
 
-	wg := WG(ctx)
+	wg := syncx.WG(ctx)
 	wg.Go(func(ctx context.Context) {
 		mainErr = mainFunc(ctx, in)
 		for i := range teeWriters {
@@ -73,7 +75,7 @@ func ReaderTeeBuffered(ctx context.Context, in io.Reader, mainFunc ConsumeReader
 	}
 
 	funcs := append([]ConsumeReaderFunc{mainFunc}, teeFuncs...)
-	wg := WG(ctx)
+	wg := syncx.WG(ctx)
 	for i := range funcs {
 		wg.Go(func(i int) func(ctx context.Context) {
 			return func(ctx context.Context) {
