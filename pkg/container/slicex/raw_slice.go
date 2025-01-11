@@ -48,6 +48,15 @@ func MapBy[T any, I comparable](in []T, fn func(T) I) map[I]T {
 	return out
 }
 
+func GroupBy[T any, I comparable](in []T, fn func(T) I) map[I][]T {
+	out := make(map[I][]T)
+	for _, v := range in {
+		k := fn(v)
+		out[k] = append(out[k], v)
+	}
+	return out
+}
+
 func ToSet[T comparable](in []T) map[T]struct{} {
 	out := make(map[T]struct{}, len(in))
 	for _, v := range in {

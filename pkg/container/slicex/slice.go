@@ -1,5 +1,7 @@
 package slicex
 
+import "github.com/RyoJerryYu/go-utilx/pkg/container/icontainer"
+
 type Slice[T comparable] []T
 
 func New[T comparable]() Slice[T]                                    { return make(Slice[T], 0) }
@@ -13,7 +15,6 @@ func (s Slice[T]) ToSet() map[T]struct{}                             { return To
 // Operator
 //////
 
-func (s Slice[T]) ForEach(fn func(T))                { ForEach(s, fn) }
 func (s Slice[T]) Intersect(other Slice[T]) Slice[T] { return Intersect(s, other) }
 func (s Slice[T]) Subtract(other Slice[T]) Slice[T]  { return Subtract(s, other) }
 func (s Slice[T]) Union(other Slice[T]) Slice[T]     { return Union(s, other) }
@@ -31,13 +32,18 @@ func SliceMergeAll[T comparable](others ...Slice[T]) Slice[T] {
 // Slice Specific
 //////
 
+func (s Slice[T]) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+
 //////
 // Container
 //////
 
-func (s Slice[T]) Len() int      { return Len(s) }
-func (s Slice[T]) IsEmpty() bool { return IsEmpty(s) }
-func (s *Slice[T]) Clear()       { *s = make(Slice[T], 0) }
-func (s Slice[T]) Has(v T) bool  { return Has(s, v) }
-func (s *Slice[T]) Add(vs ...T)  { *s = append(*s, vs...) }
-func (s *Slice[T]) Del(vs ...T)  { *s = s.Subtract(vs) }
+func (s Slice[T]) Len() int           { return Len(s) }
+func (s Slice[T]) IsEmpty() bool      { return IsEmpty(s) }
+func (s *Slice[T]) Clear()            { *s = make(Slice[T], 0) }
+func (s Slice[T]) ForEach(fn func(T)) { ForEach(s, fn) }
+func (s Slice[T]) Has(v T) bool       { return Has(s, v) }
+func (s *Slice[T]) Add(vs ...T)       { *s = append(*s, vs...) }
+func (s *Slice[T]) Del(vs ...T)       { *s = s.Subtract(vs) }
+
+var _ icontainer.Container[string] = (*Slice[string])(nil)

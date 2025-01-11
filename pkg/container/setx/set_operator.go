@@ -1,10 +1,11 @@
 package setx
 
-import "github.com/RyoJerryYu/go-utilx/pkg/container/icontainer"
+import (
+	"github.com/RyoJerryYu/go-utilx/pkg/container/icontainer"
+)
 
 type Operator[T comparable] struct{}
 
-func (Operator[T]) ForEach(set Set[T], fn func(T)) { set.ForEach(fn) }
 func (Operator[T]) Union(a, b Set[T]) Set[T]       { return a.Union(b) }
 func (Operator[T]) Subtract(a, b Set[T]) Set[T]    { return a.Subtract(b) }
 func (Operator[T]) Intersect(a, b Set[T]) Set[T]   { return a.Intersect(b) }
