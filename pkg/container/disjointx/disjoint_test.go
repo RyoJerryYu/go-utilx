@@ -9,7 +9,7 @@ import (
 func TestDisjointSet(t *testing.T) {
 	elements := []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"}
 	// length is same
-	d := NewDisjointSet(len(elements))
+	d := NewDisjointSetCore(len(elements))
 	assert.Equal(t, len(elements), len(d.parents))
 
 	// all elements are roots
@@ -51,7 +51,7 @@ func TestDisjointSet(t *testing.T) {
 // test for OrderedUnion, MembersWithoutRoot
 func TestDisjointSet_Ordered(t *testing.T) {
 	elements := []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j"}
-	d1 := NewDisjointSet(len(elements))
+	d1 := NewDisjointSetCore(len(elements))
 
 	d1.OrderedUnion(0, 1)
 	d1.OrderedUnion(0, 2)
@@ -76,7 +76,7 @@ func TestDisjointSet_Ordered(t *testing.T) {
 	assert.Len(t, membersMap[6], 1)
 	assert.Len(t, membersMap[8], 1)
 
-	d2 := NewDisjointSet(len(elements))
+	d2 := NewDisjointSetCore(len(elements))
 
 	// change the order of union don't affect the root result
 	d2.OrderedUnion(4, 5)
@@ -97,7 +97,7 @@ func TestDisjointSet_Ordered(t *testing.T) {
 
 func TestDisjointSetElement(t *testing.T) {
 	elements := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
-	d := NewDisjointSetElement(elements...)
+	d := NewDisjointSet(elements...)
 
 	// all elements are roots
 	roots := d.Roots()
@@ -137,7 +137,7 @@ func TestDisjointSetElement(t *testing.T) {
 
 func TestDisjointSetElement_Ordered(t *testing.T) {
 	elements := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}
-	d1 := NewDisjointSetElement(elements...)
+	d1 := NewDisjointSet(elements...)
 
 	d1.OrderedUnion("0", "1")
 	d1.OrderedUnion("0", "2")
@@ -162,7 +162,7 @@ func TestDisjointSetElement_Ordered(t *testing.T) {
 	assert.Len(t, membersMap["6"], 1)
 	assert.Len(t, membersMap["8"], 1)
 
-	d2 := NewDisjointSetElement(elements...)
+	d2 := NewDisjointSet(elements...)
 
 	// change the order of union don't affect the root result
 	d2.OrderedUnion("4", "5")

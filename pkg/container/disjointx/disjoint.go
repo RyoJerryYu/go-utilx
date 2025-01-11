@@ -2,7 +2,7 @@ package disjointx
 
 import "github.com/RyoJerryYu/go-utilx/pkg/container/slicex"
 
-type DisjointSet struct {
+type DisjointSetCore struct {
 	// parents[idx] < 0 means the elements[idx] is a root of a set.
 	// when parents[idx] > 0 (elements[idx] is not a root), parents[idx] means the parent of element[idx].
 	// when parents[idx] < 0 (elements[idx] is a root), -parents[idx] means the size of the set.
@@ -10,17 +10,17 @@ type DisjointSet struct {
 	parents []int
 }
 
-func NewDisjointSet(n int) DisjointSet {
+func NewDisjointSetCore(n int) DisjointSetCore {
 	parents := make([]int, n)
 	for i := range parents {
 		parents[i] = -1
 	}
-	return DisjointSet{
+	return DisjointSetCore{
 		parents: parents,
 	}
 }
 
-func (d *DisjointSet) Find(x int) int {
+func (d *DisjointSetCore) Find(x int) int {
 	if d.parents[x] < 0 {
 		return x
 	}
@@ -28,7 +28,7 @@ func (d *DisjointSet) Find(x int) int {
 	return d.parents[x]
 }
 
-func (d *DisjointSet) Union(x, y int) {
+func (d *DisjointSetCore) Union(x, y int) {
 	xRoot := d.Find(x)
 	yRoot := d.Find(y)
 	if xRoot == yRoot {
@@ -51,7 +51,7 @@ func (d *DisjointSet) Union(x, y int) {
 // Join y set into x set
 // The root of the x set will be root of the two sets
 // The amortized time complexity will be slower than Union
-func (d *DisjointSet) OrderedUnion(x, y int) {
+func (d *DisjointSetCore) OrderedUnion(x, y int) {
 	xRoot := d.Find(x)
 	yRoot := d.Find(y)
 	if xRoot == yRoot {
@@ -62,15 +62,15 @@ func (d *DisjointSet) OrderedUnion(x, y int) {
 	d.parents[yRoot] = xRoot
 }
 
-func (d *DisjointSet) SizeOf(x int) int {
+func (d *DisjointSetCore) SizeOf(x int) int {
 	return -d.parents[d.Find(x)]
 }
 
-func (d *DisjointSet) InSame(x, y int) bool {
+func (d *DisjointSetCore) InSame(x, y int) bool {
 	return d.Find(x) == d.Find(y)
 }
 
-func (d *DisjointSet) Roots() []int {
+func (d *DisjointSetCore) Roots() []int {
 	res := make([]int, 0)
 	for i, p := range d.parents {
 		if p < 0 {
@@ -80,11 +80,11 @@ func (d *DisjointSet) Roots() []int {
 	return res
 }
 
-func (d *DisjointSet) CountGroups() int {
+func (d *DisjointSetCore) CountGroups() int {
 	return len(d.Roots())
 }
 
-func (d *DisjointSet) Members(x int) []int {
+func (d *DisjointSetCore) Members(x int) []int {
 	root := d.Find(x)
 	res := make([]int, 0)
 	for i := range d.parents {
@@ -95,7 +95,7 @@ func (d *DisjointSet) Members(x int) []int {
 	return res
 }
 
-func (d *DisjointSet) MembersWithoutRoot(x int) []int {
+func (d *DisjointSetCore) MembersWithoutRoot(x int) []int {
 	root := d.Find(x)
 	res := make([]int, 0)
 	for i := range d.parents {
@@ -106,7 +106,7 @@ func (d *DisjointSet) MembersWithoutRoot(x int) []int {
 	return res
 }
 
-func (d *DisjointSet) MembersMap() map[int][]int {
+func (d *DisjointSetCore) MembersMap() map[int][]int {
 	res := make(map[int][]int)
 	for i := range d.parents {
 		root := d.Find(i)
@@ -117,7 +117,7 @@ func (d *DisjointSet) MembersMap() map[int][]int {
 
 // MembersMapWithoutRoot return members index array map by there root index.
 // The root of each set is not included in the array.
-func (d *DisjointSet) MembersMapWithoutRoot() map[int][]int {
+func (d *DisjointSetCore) MembersMapWithoutRoot() map[int][]int {
 	res := make(map[int][]int)
 	for i := range d.parents {
 		root := d.Find(i)
@@ -129,35 +129,35 @@ func (d *DisjointSet) MembersMapWithoutRoot() map[int][]int {
 	return res
 }
 
-type DisjointSetElement[T comparable] struct {
-	core          DisjointSet
+type DisjointSet[T comparable] struct {
+	core          DisjointSetCore
 	elementIdxMap map[T]int // map<element, elementIndex>
 	elements      []T       // map<elementIndex, element>
 }
 
-func NewDisjointSetElement[T comparable](elements ...T) DisjointSetElement[T] {
-	core := NewDisjointSet(len(elements))
+func NewDisjointSet[T comparable](elements ...T) DisjointSet[T] {
+	core := NewDisjointSetCore(len(elements))
 	idxMap := make(map[T]int)
 	for idx, element := range elements {
 		idxMap[element] = idx
 	}
-	return DisjointSetElement[T]{
+	return DisjointSet[T]{
 		core:          core,
 		elementIdxMap: idxMap,
 		elements:      elements,
 	}
 }
 
-func (d *DisjointSetElement[T]) idxToElement(i int) T {
+func (d *DisjointSet[T]) idxToElement(i int) T {
 	return d.elements[i]
 }
 
-func (d *DisjointSetElement[T]) have(x T) bool {
+func (d *DisjointSet[T]) have(x T) bool {
 	_, ok := d.elementIdxMap[x]
 	return ok
 }
 
-func (d *DisjointSetElement[T]) Find(x T) (T, bool) {
+func (d *DisjointSet[T]) Find(x T) (T, bool) {
 	if !d.have(x) {
 		return x, false
 	}
@@ -165,28 +165,28 @@ func (d *DisjointSetElement[T]) Find(x T) (T, bool) {
 	return d.elements[rootElementIdx], true
 }
 
-func (d *DisjointSetElement[T]) Union(x, y T) {
+func (d *DisjointSet[T]) Union(x, y T) {
 	if okx, oky := d.have(x), d.have(y); !okx || !oky {
 		return
 	}
 	d.core.Union(d.elementIdxMap[x], d.elementIdxMap[y])
 }
 
-func (d *DisjointSetElement[T]) OrderedUnion(x, y T) {
+func (d *DisjointSet[T]) OrderedUnion(x, y T) {
 	if okx, oky := d.have(x), d.have(y); !okx || !oky {
 		return
 	}
 	d.core.OrderedUnion(d.elementIdxMap[x], d.elementIdxMap[y])
 }
 
-func (d *DisjointSetElement[T]) SizeOf(x T) int {
+func (d *DisjointSet[T]) SizeOf(x T) int {
 	if !d.have(x) {
 		return 0
 	}
 	return d.core.SizeOf(d.elementIdxMap[x])
 }
 
-func (d *DisjointSetElement[T]) InSame(x, y T) bool {
+func (d *DisjointSet[T]) InSame(x, y T) bool {
 	if okx, oky := d.have(x), d.have(y); !okx || !oky {
 		return false
 	}
@@ -194,17 +194,17 @@ func (d *DisjointSetElement[T]) InSame(x, y T) bool {
 }
 
 // return root element of each groups
-func (d *DisjointSetElement[T]) Roots() []T {
+func (d *DisjointSet[T]) Roots() []T {
 	rootElementIdxs := d.core.Roots()
 	return slicex.To(rootElementIdxs, d.idxToElement)
 }
 
-func (d *DisjointSetElement[T]) CountGroups() int {
+func (d *DisjointSet[T]) CountGroups() int {
 	return d.core.CountGroups()
 }
 
 // return elements with same group as x
-func (d *DisjointSetElement[T]) Members(x T) []T {
+func (d *DisjointSet[T]) Members(x T) []T {
 	if !d.have(x) {
 		return nil
 	}
@@ -212,7 +212,7 @@ func (d *DisjointSetElement[T]) Members(x T) []T {
 	return slicex.To(memberIdxs, d.idxToElement)
 }
 
-func (d *DisjointSetElement[T]) MembersWithoutRoot(x T) []T {
+func (d *DisjointSet[T]) MembersWithoutRoot(x T) []T {
 	if !d.have(x) {
 		return nil
 	}
@@ -221,7 +221,7 @@ func (d *DisjointSetElement[T]) MembersWithoutRoot(x T) []T {
 }
 
 // return elements array map by there root element.
-func (d *DisjointSetElement[T]) MembersMap() map[T][]T {
+func (d *DisjointSet[T]) MembersMap() map[T][]T {
 	membersIndexMap := d.core.MembersMap()
 	res := make(map[T][]T)
 	for root, memberIdxs := range membersIndexMap {
@@ -231,7 +231,7 @@ func (d *DisjointSetElement[T]) MembersMap() map[T][]T {
 }
 
 // return elements array without root map by there root element.
-func (d *DisjointSetElement[T]) MembersMapWithoutRoot() map[T][]T {
+func (d *DisjointSet[T]) MembersMapWithoutRoot() map[T][]T {
 	membersIndexMap := d.core.MembersMapWithoutRoot()
 	res := make(map[T][]T)
 	for root, memberIdxs := range membersIndexMap {
