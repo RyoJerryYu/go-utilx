@@ -1,4 +1,4 @@
-package disjoint
+package disjointx
 
 import "github.com/RyoJerryYu/go-utilx/pkg/container/slicex"
 

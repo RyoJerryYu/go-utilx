@@ -1,4 +1,4 @@
-package disjoint
+package disjointx
 
 import (
 	"testing"
