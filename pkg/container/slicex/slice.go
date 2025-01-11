@@ -13,6 +13,7 @@ func (s Slice[T]) ToSet() map[T]struct{}                             { return To
 // Operator
 //////
 
+func (s Slice[T]) ForEach(fn func(T))                { ForEach(s, fn) }
 func (s Slice[T]) Intersect(other Slice[T]) Slice[T] { return Intersect(s, other) }
 func (s Slice[T]) Subtract(other Slice[T]) Slice[T]  { return Subtract(s, other) }
 func (s Slice[T]) Union(other Slice[T]) Slice[T]     { return Union(s, other) }

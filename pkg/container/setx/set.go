@@ -15,6 +15,7 @@ func (s Set[T]) ToSlice() []T                           { return ToSlice(s) }
 func Wrap[T comparable](in map[T]struct{}) Set[T] { return in }
 func (s Set[T]) Unwrap() map[T]struct{}           { return s }
 
+func (s Set[T]) ForEach(fn func(T))               { ForEach(s, fn) }
 func (s Set[T]) IntersectSlice(arr []T) Set[T]    { return IntersectSlice(s, arr) }
 func (s Set[T]) IntersectSet(other Set[T]) Set[T] { return IntersectSet(s, other) }
 func (s Set[T]) SubtractSlice(arr []T) Set[T]     { return SubtractSlice(s, arr) }

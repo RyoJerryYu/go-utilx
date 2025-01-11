@@ -56,6 +56,12 @@ func ToSet[T comparable](in []T) map[T]struct{} {
 	return out
 }
 
+func ForEach[T any](in []T, fn func(T)) {
+	for _, v := range in {
+		fn(v)
+	}
+}
+
 // a & b , in the order of a
 func Intersect[T comparable](a []T, b []T) []T {
 	set := ToSet(b)
