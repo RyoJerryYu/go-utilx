@@ -31,12 +31,44 @@ func From[T any](in ...T) []T {
 	return in
 }
 
+func To[T any, I any](in []T, getValue func(T) I) []I {
+	out := make([]I, len(in))
+	for idx := range in {
+		out[idx] = getValue(in[idx])
+	}
+
+	return out
+}
+
+func MapBy[T any, I comparable](in []T, fn func(T) I) map[I]T {
+	out := make(map[I]T, len(in))
+	for _, v := range in {
+		out[fn(v)] = v
+	}
+	return out
+}
+
+func GroupBy[T any, I comparable](in []T, fn func(T) I) map[I][]T {
+	out := make(map[I][]T)
+	for _, v := range in {
+		k := fn(v)
+		out[k] = append(out[k], v)
+	}
+	return out
+}
+
 func ToSet[T comparable](in []T) map[T]struct{} {
 	out := make(map[T]struct{}, len(in))
 	for _, v := range in {
 		out[v] = struct{}{}
 	}
 	return out
+}
+
+func ForEach[T any](in []T, fn func(T)) {
+	for _, v := range in {
+		fn(v)
+	}
 }
 
 // a & b , in the order of a

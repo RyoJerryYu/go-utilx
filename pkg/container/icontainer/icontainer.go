@@ -4,9 +4,7 @@ type Container[T any] interface {
 	Len() int
 	IsEmpty() bool
 	Clear()
-	Has(v T) bool
-	Add(vs ...T) // Add vs to container
-	Del(vs ...T) // Remove vs from container
+	ForEach(fn func(T))
 }
 
 type (

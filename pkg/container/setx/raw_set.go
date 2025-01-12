@@ -31,6 +31,12 @@ func ToSlice[T comparable](in map[T]struct{}) []T {
 	return out
 }
 
+func ForEach[T comparable](in map[T]struct{}, fn func(T)) {
+	for k := range in {
+		fn(k)
+	}
+}
+
 // s & arr
 func IntersectSlice[T comparable](s map[T]struct{}, arr []T) map[T]struct{} {
 	out := make(map[T]struct{})

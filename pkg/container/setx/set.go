@@ -31,9 +31,9 @@ func (s Set[T]) RemoveSet(other Set[T]) Set[T] { return RemoveSet(s, other) } //
 // Operator
 //////
 
-func (s Set[T]) Union(other Set[T]) Set[T]     { return s.Union(other) }
-func (s Set[T]) Subtract(other Set[T]) Set[T]  { return s.Subtract(other) }
-func (s Set[T]) Intersect(other Set[T]) Set[T] { return s.Intersect(other) }
+func (s Set[T]) Union(other Set[T]) Set[T]     { return Union(s, other) }
+func (s Set[T]) Subtract(other Set[T]) Set[T]  { return Subtract(s, other) }
+func (s Set[T]) Intersect(other Set[T]) Set[T] { return Intersect(s, other) }
 func (s Set[T]) Equal(other Set[T]) bool       { return Equal(s, other) }
 func (s Set[T]) Copy() Set[T]                  { return Copy(s) }
 func SetMergeAll[T comparable](sets ...Set[T]) Set[T] {
@@ -55,11 +55,12 @@ func (s Set[T]) Remove(other Set[T]) Set[T] { return s.RemoveSet(other) }
 // Container
 //////
 
-func (s Set[T]) Len() int      { return Len(s) }
-func (s Set[T]) IsEmpty() bool { return IsEmpty(s) }
-func (s Set[T]) Clear()        { Clear(s) }
-func (s Set[T]) Has(v T) bool  { return Has(s, v) }
-func (s Set[T]) Add(vs ...T)   { Add(s, vs...) }
-func (s Set[T]) Del(vs ...T)   { Del(s, vs...) }
+func (s Set[T]) Len() int           { return Len(s) }
+func (s Set[T]) IsEmpty() bool      { return IsEmpty(s) }
+func (s Set[T]) Clear()             { Clear(s) }
+func (s Set[T]) ForEach(fn func(T)) { ForEach(s, fn) }
+func (s Set[T]) Has(v T) bool       { return Has(s, v) }
+func (s Set[T]) Add(vs ...T)        { Add(s, vs...) }
+func (s Set[T]) Del(vs ...T)        { Del(s, vs...) }
 
 var _ icontainer.Container[any] = (Set[any])(nil)
