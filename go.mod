@@ -7,6 +7,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.58.0
 	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c
+	golang.org/x/oauth2 v0.25.0
 	google.golang.org/protobuf v1.36.0
 )
 

@@ -41,6 +41,25 @@ func NewXClientFromHttp(httpCli *http.Client, opts ...XClientOption) *XClient {
 		inner: cliCore,
 	}
 }
+func NewXClientFromInterface(httpCli Client, opts ...XClientOption) *XClient {
+	c := xClientConfig{}
+	for _, opt := range opts {
+		opt.apply(&c)
+	}
+
+	if !c.withoutDefaultOption {
+		c.clientOptions = append(c.clientOptions, WithOtel())
+		c.clientDecorators = append(c.clientDecorators, WithReturnErrorIfNot2xx())
+	}
+
+	var cliCore Client = httpCli
+	for _, opt := range c.clientDecorators {
+		cliCore = opt(cliCore)
+	}
+	return &XClient{
+		inner: cliCore,
+	}
+}
 
 func (c *XClient) Do(req *http.Request, opts ...XRequestOption) (*http.Response, error) {
 	cfg := xRequestOpts{}
