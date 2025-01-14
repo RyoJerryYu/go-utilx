@@ -42,7 +42,12 @@ func NewXClientFromHttp(httpCli *http.Client, opts ...XClientOption) *XClient {
 	}
 }
 
-func (c *XClient) Do(req *http.Request) (*http.Response, error) {
+func (c *XClient) Do(req *http.Request, opts ...XRequestOption) (*http.Response, error) {
+	cfg := xRequestOpts{}
+	for _, opt := range opts {
+		opt(&cfg)
+	}
+	cfg.applyRequest(req)
 	return c.inner.Do(req)
 }
 
@@ -54,108 +59,56 @@ func (c *XClient) Head(ctx context.Context, url string) (*http.Response, error) 
 	return c.Do(req)
 }
 
-func (c *XClient) Get(ctx context.Context, url string) (*http.Response, error) {
+func (c *XClient) Get(ctx context.Context, url string, opts ...XRequestOption) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
-	return c.Do(req)
+	return c.Do(req, opts...)
 }
 
-func (c *XClient) Post(ctx context.Context, url string, contentType string, body io.Reader) (*http.Response, error) {
+func (c *XClient) Post(ctx context.Context, url string, contentType string, body io.Reader, opts ...XRequestOption) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, body)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", contentType)
-	return c.Do(req)
-
+	return c.Do(req, opts...)
 }
 
-func (c *XClient) PostForm(ctx context.Context, url string, data url.Values) (*http.Response, error) {
-	return c.Post(ctx, url, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()))
+func (c *XClient) GetBytes(ctx context.Context, url string, opts ...XRequestOption) ([]byte, error) {
+	resp, err := c.Get(ctx, url, opts...)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	return io.ReadAll(resp.Body)
 }
 
-func (c *XClient) PostJSON(ctx context.Context, url string, request any, response any) error {
+func (c *XClient) GetJSON(ctx context.Context, url string, response any, opts ...XRequestOption) error {
+	resp, err := c.Get(ctx, url, opts...)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return json.NewDecoder(resp.Body).Decode(response)
+}
+
+func (c *XClient) PostForm(ctx context.Context, url string, data url.Values, opts ...XRequestOption) (*http.Response, error) {
+	return c.Post(ctx, url, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()), opts...)
+}
+
+func (c *XClient) PostJSON(ctx context.Context, url string, request any, response any, opts ...XRequestOption) error {
 	buf := bytes.NewBuffer(nil)
 	err := json.NewEncoder(buf).Encode(request)
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.Post(ctx, url, "application/json", buf)
+	resp, err := c.Post(ctx, url, "application/json", buf, opts...)
 	if err != nil {
 		return err
 	}
 
 	return json.NewDecoder(resp.Body).Decode(response)
-}
-
-func (c *XClient) XGet(ctx context.Context, url string, opts ...XRequestOption) ([]byte, error) {
-	cfg := xRequestOpts{}
-	for _, opt := range opts {
-		opt(&cfg)
-	}
-
-	// Create a new HTTP request
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	cfg.applyRequest(req)
-
-	req = req.WithContext(ctx)
-
-	// Send the request and handle the response
-	resp, err := c.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// Read the response body
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	cfg.applyResponseBody(respBody)
-
-	return respBody, nil
-}
-
-func (c *XClient) XPost(ctx context.Context, url string, contentType string, body io.Reader, opts ...XRequestOption) ([]byte, error) {
-	cfg := xRequestOpts{}
-	for _, opt := range opts {
-		opt(&cfg)
-	}
-
-	// Create a new HTTP request
-	req, err := http.NewRequest(http.MethodPost, url, body)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", contentType)
-
-	cfg.applyRequest(req)
-
-	req = req.WithContext(ctx)
-
-	// Send the request and handle the response
-	resp, err := c.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// Read the response body
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	cfg.applyResponseBody(respBody)
-
-	return respBody, nil
 }

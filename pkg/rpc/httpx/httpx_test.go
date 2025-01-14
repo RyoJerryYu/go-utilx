@@ -7,7 +7,7 @@ import (
 func TestBuildURL(t *testing.T) {
 	type args struct {
 		baseURL     string
-		queryParams map[string]string
+		queryParams map[string][]string
 	}
 	tests := []struct {
 		name    string
@@ -19,8 +19,8 @@ func TestBuildURL(t *testing.T) {
 			name: "simple",
 			args: args{
 				baseURL: "www.abc.com",
-				queryParams: map[string]string{
-					"b": "2",
+				queryParams: map[string][]string{
+					"b": {"2"},
 				},
 			},
 			want:    "www.abc.com?b=2",
@@ -30,8 +30,8 @@ func TestBuildURL(t *testing.T) {
 			name: "simple-1",
 			args: args{
 				baseURL: "www.abc.com?a=1",
-				queryParams: map[string]string{
-					"b": "2",
+				queryParams: map[string][]string{
+					"b": {"2"},
 				},
 			},
 			want:    "www.abc.com?a=1&b=2",

@@ -10,8 +10,7 @@ XRequestOption is a type that allow additional options for one request.
 */
 
 type xRequestOpts struct {
-	applyReqs  []func(*http.Request)
-	applyResps []func([]byte)
+	applyReqs []func(*http.Request)
 }
 
 type XRequestOption func(*xRequestOpts)
@@ -59,11 +58,5 @@ func (c *xRequestOpts) addApplyRequest(apply func(*http.Request)) {
 func (c *xRequestOpts) applyRequest(req *http.Request) {
 	for _, apply := range c.applyReqs {
 		apply(req)
-	}
-}
-
-func (c *xRequestOpts) applyResponseBody(respBody []byte) {
-	for _, apply := range c.applyResps {
-		apply(respBody)
 	}
 }

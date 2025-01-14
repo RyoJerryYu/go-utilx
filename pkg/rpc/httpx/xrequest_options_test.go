@@ -26,10 +26,11 @@ func TestSimpleRequestOptions(t *testing.T) {
 	client := NewXClient()
 
 	ctx := context.Background()
-	resp, err := client.XGet(ctx, s.URL+"/testpath",
+	resp, err := client.GetBytes(ctx, s.URL+"/testpath",
 		WithQuery("a", "b"),
 		WithHeader("c", "d"),
 	)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
+	require.Equal(t, "hello", string(resp))
 }

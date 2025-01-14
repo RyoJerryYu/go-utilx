@@ -23,11 +23,15 @@ func PostJSON(ctx context.Context, url string, request any, response any) error 
 	return defaultCli.PostJSON(ctx, url, request, response)
 }
 
-func XGet(ctx context.Context, url string, opts ...XRequestOption) ([]byte, error) {
-	return defaultCli.XGet(ctx, url, opts...)
+func GetBytes(ctx context.Context, url string, opts ...XRequestOption) ([]byte, error) {
+	return defaultCli.GetBytes(ctx, url, opts...)
 }
 
-func BuildURL(baseURL string, queryParams map[string]string) (string, error) {
+func GetJSON(ctx context.Context, url string, response any, opts ...XRequestOption) error {
+	return defaultCli.GetJSON(ctx, url, response, opts...)
+}
+
+func BuildURL(baseURL string, queryParams map[string][]string) (string, error) {
 	// Parse the base URL to get the URL object
 	u, err := url.Parse(baseURL)
 	if err != nil {
@@ -35,11 +39,13 @@ func BuildURL(baseURL string, queryParams map[string]string) (string, error) {
 	}
 
 	// Add the query parameters to the URL object
-	q := u.Query()
+	query := u.Query()
 	for k, v := range queryParams {
-		q.Set(k, v)
+		for _, vv := range v {
+			query.Add(k, vv)
+		}
 	}
-	u.RawQuery = q.Encode()
+	u.RawQuery = query.Encode()
 
 	// Convert the URL object to a string
 	return strings.TrimRight(u.String(), "?"), nil
