@@ -6,39 +6,31 @@ import (
 	"time"
 )
 
-var handlePanicErr func(error) = func(err error) { panic(err) }
+var handlePanicErr func(context.Context, error) = func(ctx context.Context, err error) {
+	panic(err)
+}
 
-func RegisterPanicHandler(f func(error)) {
+func RegisterPanicHandler(f func(context.Context, error)) {
 	handlePanicErr = f
-}
-
-type neverDone struct{ context.Context }
-
-func (neverDone) Deadline() (deadline time.Time, ok bool) {
-	return
-}
-
-func (neverDone) Done() <-chan struct{} {
-	return make(chan struct{})
-}
-
-func (neverDone) Err() error {
-	return nil
 }
 
 type GoOption func(ctx context.Context) (context.Context, func())
 
 func Go(ctx context.Context, f func(ctx context.Context), opts ...GoOption) {
-	ctx = neverDone{ctx}
 	cancels := make([]func(), 0, len(opts))
-	go func() {
+	var cancel func()
+	for _, opt := range opts {
+		ctx, cancel = opt(ctx)
+		cancels = append(cancels, cancel)
+	}
+	go func(ctx context.Context) {
 		defer func() {
 			if r := recover(); r != nil {
 				err, ok := r.(error)
 				if !ok {
 					err = fmt.Errorf("%v", r)
 				}
-				handlePanicErr(err)
+				handlePanicErr(ctx, err)
 			}
 
 			for _, cancel := range cancels {
@@ -46,17 +38,18 @@ func Go(ctx context.Context, f func(ctx context.Context), opts ...GoOption) {
 			}
 		}()
 
-		var cancel func()
-		for _, opt := range opts {
-			ctx, cancel = opt(ctx)
-			cancels = append(cancels, cancel)
-		}
 		f(ctx)
-	}()
+	}(ctx)
 }
 
 func WithTimeout(d time.Duration) GoOption {
 	return func(ctx context.Context) (context.Context, func()) {
 		return context.WithTimeout(ctx, d)
+	}
+}
+
+func WithNoCancel() GoOption {
+	return func(ctx context.Context) (context.Context, func()) {
+		return context.WithoutCancel(ctx), func() {}
 	}
 }

@@ -41,7 +41,7 @@ func TestGo(t *testing.T) {
 	t.Run("test panic handling", func(t *testing.T) {
 		t.Parallel()
 		var panicErr error
-		RegisterPanicHandler(func(err error) {
+		RegisterPanicHandler(func(ctx context.Context, err error) {
 			panicErr = err
 		})
 		Go(context.Background(), func(ctx context.Context) {
@@ -67,6 +67,24 @@ func TestGo(t *testing.T) {
 		select {
 		case <-done:
 		case <-time.After(3 * time.Second):
+			t.Fatal("function did not complete in time")
+		}
+	})
+
+	t.Run("test with no cancel", func(t *testing.T) {
+		t.Parallel()
+		done := make(chan struct{})
+		Go(context.Background(), func(ctx context.Context) {
+			select {
+			case <-ctx.Done():
+				t.Fatal("context should not be cancelled")
+			case <-time.After(5 * time.Microsecond):
+				close(done)
+			}
+		}, WithNoCancel())
+		select {
+		case <-done:
+		case <-time.After(50 * time.Microsecond):
 			t.Fatal("function did not complete in time")
 		}
 	})
