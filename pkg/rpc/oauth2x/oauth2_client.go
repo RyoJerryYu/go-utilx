@@ -9,10 +9,6 @@ OAuth2Core 改造自 oauth2.Transport , 做了如下修改：
 代码在 https://github.com/golang/oauth2/blob/master/transport.go 基础上有所修改
 */
 
-// Copyright 2014 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 import (
 	"context"
 	"errors"
@@ -81,7 +77,7 @@ func (t *OAuth2Core) Do(req *http.Request) (*http.Response, error) {
 		defer resp.Body.Close() // golang HTTP 规范要求 RoundTrip 中返回 err 时，resp.Body 需要关闭
 		respBuf, err := io.ReadAll(resp.Body)
 		if err != nil {
-			t.RecordError(t.Ctx, err)
+			t.recordError(t.Ctx, err)
 		}
 
 		err = fmt.Errorf("oauth2: Authorization failed, resp: %s", string(respBuf))
@@ -127,15 +123,16 @@ func (t *OAuth2Core) returnAuthError(oldToken *oauth2.Token, err error) error {
 		t.OnAuthError(t.Ctx, oldToken, err)
 	}
 
+	// no authenticationInvalid error registered, return raw error
 	if t.ErrAuthenticationInvalid == nil {
 		return err
 	}
 
-	t.RecordError(t.Ctx, err)
+	t.recordError(t.Ctx, err)
 	return t.ErrAuthenticationInvalid
 }
 
-func (t *OAuth2Core) RecordError(ctx context.Context, err error) {
+func (t *OAuth2Core) recordError(ctx context.Context, err error) {
 	if t.OnRecordError != nil {
 		t.OnRecordError(ctx, err)
 	}
@@ -183,5 +180,11 @@ func WithOnAuthError(onRefreshTokenFailed func(ctx context.Context, oldToken *oa
 func WithAuthError(err error) OAuth2HttpOption {
 	return func(t *OAuth2Core) {
 		t.ErrAuthenticationInvalid = err
+	}
+}
+
+func WithRecordError(onRecordError func(ctx context.Context, err error)) OAuth2HttpOption {
+	return func(t *OAuth2Core) {
+		t.OnRecordError = onRecordError
 	}
 }
