@@ -2,6 +2,10 @@ package slicex
 
 import "github.com/RyoJerryYu/go-utilx/pkg/container/icontainer"
 
+// This file defines type aliases and constructors for common slice types.
+// Each type alias is a specialized version of Slice[T] for a specific type.
+// Each New* function creates an empty slice of the corresponding type.
+
 type (
 	BoolSlice       = Slice[bool]
 	StrSlice        = Slice[string]

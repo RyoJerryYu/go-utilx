@@ -2,8 +2,11 @@ package slicex
 
 import "github.com/RyoJerryYu/go-utilx/pkg/container/icontainer"
 
+// Slice is a generic slice type that implements various container operations.
+// Type parameter T must be comparable to support operations like Union and Intersect.
 type Slice[T comparable] []T
 
+// New creates a new empty Slice.
 func New[T comparable]() Slice[T]                                    { return make(Slice[T], 0) }
 func SliceFromKey[T comparable, V any](in map[T]V) Slice[T]          { return FromKey(in) }
 func SliceFromValue[T comparable, V comparable](in map[T]V) Slice[V] { return FromValue(in) }
@@ -20,6 +23,15 @@ func (s Slice[T]) Subtract(other Slice[T]) Slice[T]  { return Subtract(s, other)
 func (s Slice[T]) Union(other Slice[T]) Slice[T]     { return Union(s, other) }
 func (s Slice[T]) Equal(other Slice[T]) bool         { return Equal(s, other) }
 func (s Slice[T]) Copy() Slice[T]                    { return Copy(s) }
+
+// SliceMergeAll combines multiple Slices into a single Slice.
+// The order of elements is preserved and duplicates are not removed.
+// Example:
+//
+//	a := SliceFrom(1, 2)
+//	b := SliceFrom(2, 3)
+//	result := SliceMergeAll(a, b)
+//	// result = Slice{1, 2, 2, 3}
 func SliceMergeAll[T comparable](others ...Slice[T]) Slice[T] {
 	rawSlices := make([][]T, len(others))
 	for i, s := range others {
