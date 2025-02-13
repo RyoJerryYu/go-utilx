@@ -9,12 +9,34 @@ import (
 	"github.com/RyoJerryYu/go-utilx/pkg/coroutine/syncx"
 )
 
+// ConsumeReaderFunc is a function type that consumes data from an io.Reader.
+// The function should handle the reading and processing of the data.
 type ConsumeReaderFunc func(ctx context.Context, reader io.Reader) error
 
-// ReaderTee read all from in and tee to all teeFuncs and mainFunc
-// It will stream the data, low memory usage
-// mainFunc should read all data from in
-// teeFuncs can read all what mainFunc read
+// ReaderTee reads data from the input reader and distributes it to multiple consumers.
+// It uses io.TeeReader to create a chain of readers, allowing each consumer to read
+// the same data stream.
+//
+// The mainFunc is responsible for driving the reading process - it must read all data
+// from the input reader for the tee operation to work properly. All teeFuncs will
+// receive the same data that mainFunc reads.
+//
+// Example usage:
+//
+//	err := ReaderTee(ctx, inputReader,
+//	    func(ctx context.Context, r io.Reader) error {
+//	        // Main consumer that must read all data
+//	        return processData(r)
+//	    },
+//	    func(ctx context.Context, r io.Reader) error {
+//	        // Additional consumer 1
+//	        return saveToFile(r)
+//	    },
+//	    func(ctx context.Context, r io.Reader) error {
+//	        // Additional consumer 2
+//	        return uploadToCloud(r)
+//	    },
+//	)
 func ReaderTee(ctx context.Context, in io.Reader, mainFunc ConsumeReaderFunc, teeFuncs ...ConsumeReaderFunc) error {
 	var (
 		mainErr    error            = nil
@@ -55,8 +77,27 @@ func ReaderTee(ctx context.Context, in io.Reader, mainFunc ConsumeReaderFunc, te
 	return errors.Join(errs...) // errors.Join automatically filters out nil errors
 }
 
-// ReaderTeeBuffered read all from in and tee to all teeFuncs
-// It will buffer all the read data in memory
+// ReaderTeeBuffered reads all data from the input reader into memory first,
+// then provides the buffered data to all consumers. Unlike ReaderTee, this function
+// stores all data in memory before processing, which may not be suitable for large
+// data streams.
+//
+// The function creates separate buffer copies for each consumer (including mainFunc),
+// ensuring that each consumer gets the complete data regardless of how others
+// process it.
+//
+// Example usage:
+//
+//	err := ReaderTeeBuffered(ctx, inputReader,
+//	    func(ctx context.Context, r io.Reader) error {
+//	        // Main consumer
+//	        return processBufferedData(r)
+//	    },
+//	    func(ctx context.Context, r io.Reader) error {
+//	        // Additional consumer
+//	        return saveBufferedData(r)
+//	    },
+//	)
 func ReaderTeeBuffered(ctx context.Context, in io.Reader, mainFunc ConsumeReaderFunc, teeFuncs ...ConsumeReaderFunc) error {
 	var (
 		errs []error        = make([]error, len(teeFuncs)+1)        // all nil, main + tee
