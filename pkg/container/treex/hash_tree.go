@@ -2,6 +2,11 @@ package treex
 
 import "github.com/RyoJerryYu/go-utilx/pkg/container/slicex"
 
+// HashNode represents a node in a tree structure that uses a hash map to store children.
+// This implementation allows for O(1) child lookup by ID.
+// Type parameters:
+//   - ID: The type of node identifier, must be comparable
+//   - T: The type of value stored in the node
 type HashNode[ID comparable, T any] struct {
 	Id       ID
 	Path     []ID // Path from root to this node, including this node.
@@ -25,6 +30,8 @@ func (n *HashNode[ID, T]) Size() int {
 	return cnt
 }
 
+// HashNodeOperator provides operations for HashNode trees.
+// It implements the NodeOperator interface for HashNode types.
 type HashNodeOperator[ID comparable, T any] struct{}
 
 func (HashNodeOperator[ID, T]) Parent(node *HashNode[ID, T]) *HashNode[ID, T] {

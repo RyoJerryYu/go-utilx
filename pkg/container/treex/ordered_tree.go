@@ -1,5 +1,10 @@
 package treex
 
+// OrderedNode represents a node in a tree structure that maintains children in an ordered slice.
+// This implementation preserves the order of child nodes as they are added.
+// Type parameters:
+//   - ID: The type of node identifier, must be comparable
+//   - T: The type of value stored in the node
 type OrderedNode[ID comparable, T any] struct {
 	Id       ID
 	Path     []ID // Path from root to this node, including this node.
@@ -23,6 +28,8 @@ func (n *OrderedNode[ID, T]) Size() int {
 	return cnt
 }
 
+// OrderedNodeOperator provides operations for OrderedNode trees.
+// It implements the NodeOperator interface for OrderedNode types.
 type OrderedNodeOperator[ID comparable, T any] struct{}
 
 func (OrderedNodeOperator[ID, T]) Parent(node *OrderedNode[ID, T]) *OrderedNode[ID, T] {
