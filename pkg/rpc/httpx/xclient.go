@@ -10,14 +10,30 @@ import (
 	"strings"
 )
 
+// XClient is an enhanced HTTP client that wraps http.Client with additional functionality.
+// It provides a more convenient API and supports middleware-like decorators.
 type XClient struct {
 	inner Client
 }
 
+// NewXClient creates a new XClient with default http.Client and options.
+// By default, it includes OpenTelemetry instrumentation and error handling for non-2xx responses.
+//
+// Example:
+//
+//	client := NewXClient(
+//	    WithBearerAuth("token"),
+//	    WithUnwrapTransportError(),
+//	)
 func NewXClient(opts ...XClientOption) *XClient {
 	return NewXClientFromHttp(&http.Client{}, opts...)
 }
 
+// NewXClientFromHttp creates a new XClient from an existing http.Client.
+// It applies the given options to the client while preserving its original configuration.
+//
+// The default options (OpenTelemetry and error handling) are still applied unless
+// WithoutDefaultOption() is used.
 func NewXClientFromHttp(httpCli *http.Client, opts ...XClientOption) *XClient {
 	c := xClientConfig{}
 	for _, opt := range opts {
@@ -41,6 +57,7 @@ func NewXClientFromHttp(httpCli *http.Client, opts ...XClientOption) *XClient {
 		inner: cliCore,
 	}
 }
+
 func NewXClientFromInterface(httpCli Client, opts ...XClientOption) *XClient {
 	c := xClientConfig{}
 	for _, opt := range opts {
@@ -104,6 +121,16 @@ func (c *XClient) GetBytes(ctx context.Context, url string, opts ...XRequestOpti
 	return io.ReadAll(resp.Body)
 }
 
+// GetJSON performs a GET request and unmarshals the response JSON into the provided interface.
+// The response parameter must be a pointer to a type that can be unmarshaled from JSON.
+//
+// Example:
+//
+//	var response struct {
+//	    Name string `json:"name"`
+//	    Age  int    `json:"age"`
+//	}
+//	err := client.GetJSON(ctx, "https://api.example.com/user/1", &response)
 func (c *XClient) GetJSON(ctx context.Context, url string, response any, opts ...XRequestOption) error {
 	resp, err := c.Get(ctx, url, opts...)
 	if err != nil {
@@ -117,6 +144,20 @@ func (c *XClient) PostForm(ctx context.Context, url string, data url.Values, opt
 	return c.Post(ctx, url, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()), opts...)
 }
 
+// PostJSON performs a POST request with a JSON body and unmarshals the response into
+// the provided interface. Both request and response parameters must be compatible with
+// JSON marshaling/unmarshaling.
+//
+// Example:
+//
+//	request := struct {
+//	    Name string `json:"name"`
+//	}{Name: "John"}
+//	var response struct {
+//	    ID   int    `json:"id"`
+//	    Name string `json:"name"`
+//	}
+//	err := client.PostJSON(ctx, "https://api.example.com/users", request, &response)
 func (c *XClient) PostJSON(ctx context.Context, url string, request any, response any, opts ...XRequestOption) error {
 	buf := bytes.NewBuffer(nil)
 	err := json.NewEncoder(buf).Encode(request)

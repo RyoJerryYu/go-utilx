@@ -1,9 +1,16 @@
+// Container is a generic interface that defines basic container operations.
+// Type parameter T represents the type of elements stored in the container.
 package icontainer
 
+// Container defines the basic operations that all containers should implement.
 type Container[T any] interface {
+	// Len returns the number of elements in the container.
 	Len() int
+	// IsEmpty returns true if the container contains no elements.
 	IsEmpty() bool
+	// Clear removes all elements from the container.
 	Clear()
+	// ForEach executes the given function for each element in the container.
 	ForEach(fn func(T))
 }
 

@@ -4,16 +4,24 @@ import (
 	"github.com/RyoJerryYu/go-utilx/pkg/container/icontainer"
 )
 
+// Set is a generic set type implemented using a map with empty struct values.
+// Type parameter T must be comparable to support set operations.
 type Set[T comparable] map[T]struct{}
 
+// New creates a new empty Set.
 func New[T comparable]() Set[T]                         { return make(Set[T]) }
 func SetFromKey[T comparable, V any](in map[T]V) Set[T] { return FromKey(in) }
 func SetFromSlice[T comparable](in []T) Set[T]          { return FromSlice(in) }
 func SetFrom[T comparable](in ...T) Set[T]              { return From(in...) }
 func (s Set[T]) ToSlice() []T                           { return ToSlice(s) }
 
+// Wrap converts a raw map[T]struct{} to a Set[T].
+// This is a zero-cost conversion as it just changes the type.
 func Wrap[T comparable](in map[T]struct{}) Set[T] { return in }
-func (s Set[T]) Unwrap() map[T]struct{}           { return s }
+
+// Unwrap converts a Set[T] back to a raw map[T]struct{}.
+// This is a zero-cost conversion as it just changes the type.
+func (s Set[T]) Unwrap() map[T]struct{} { return s }
 
 func (s Set[T]) IntersectSlice(arr []T) Set[T]    { return IntersectSlice(s, arr) }
 func (s Set[T]) IntersectSet(other Set[T]) Set[T] { return IntersectSet(s, other) }
@@ -36,6 +44,16 @@ func (s Set[T]) Subtract(other Set[T]) Set[T]  { return Subtract(s, other) }
 func (s Set[T]) Intersect(other Set[T]) Set[T] { return Intersect(s, other) }
 func (s Set[T]) Equal(other Set[T]) bool       { return Equal(s, other) }
 func (s Set[T]) Copy() Set[T]                  { return Copy(s) }
+
+// SetMergeAll combines multiple Sets into a single Set.
+// Duplicate elements will only appear once in the result.
+// Example:
+//
+//	set1 := SetFrom(1, 2)
+//	set2 := SetFrom(2, 3)
+//	set3 := SetFrom(3, 4)
+//	result := SetMergeAll(set1, set2, set3)
+//	// result contains: 1, 2, 3, 4
 func SetMergeAll[T comparable](sets ...Set[T]) Set[T] {
 	rawSets := make([]map[T]struct{}, len(sets))
 	for i, set := range sets {

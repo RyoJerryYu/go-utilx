@@ -20,8 +20,21 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// OAuth2Core is an httpx.Client
-// It could handle oauth2 token refresh and auth automatically
+// OAuth2Core is an httpx.Client that handles OAuth2 authentication automatically.
+// It is based on oauth2.Transport but with the following improvements:
+// 1. Token refresh is handled at the client level instead of transport level
+// 2. Provides hooks for token refresh events
+// 3. Returns specific errors for authentication failures
+//
+// Example usage:
+//
+//	core := &OAuth2Core{
+//	    Source: oauth2.StaticTokenSource(initialToken),
+//	    OnRefreshTokenChange: func(ctx context.Context, newToken *oauth2.Token) error {
+//	        // Save the new token
+//	        return saveToken(newToken)
+//	    },
+//	}
 type OAuth2Core struct {
 	// Source supplies the token to add to outgoing requests'
 	// Authorization headers.
@@ -39,8 +52,15 @@ type OAuth2Core struct {
 	OnRecordError            func(ctx context.Context, err error)
 }
 
-// Do authorizes and authenticates the request with an
-// access token from Transport's Source.
+// Do authorizes and authenticates the request with an access token.
+// It will:
+// 1. Get a valid token from the TokenSource
+// 2. Trigger OnRefreshTokenChange if the refresh token has changed
+// 3. Add the token to the request's Authorization header
+// 4. Execute the request
+// 5. Handle authentication errors (401/403) by returning ErrAuthenticationInvalid
+//
+// Note: When returning an error, the response body will be closed automatically.
 func (t *OAuth2Core) Do(req *http.Request) (*http.Response, error) {
 	reqBodyClosed := false
 	if req.Body != nil {
@@ -138,6 +158,19 @@ func (t *OAuth2Core) recordError(ctx context.Context, err error) {
 	}
 }
 
+// WithOAuth2Http creates a ClientDecorator that adds OAuth2 authentication to an HTTP client.
+// It will use the provided token source for authentication and handle token refresh automatically.
+//
+// Example:
+//
+//	client := httpx.NewXClient(
+//	    WithOAuth2Http(ctx, currentToken, tokenSource,
+//	        WithOnRefreshTokenChange(func(ctx context.Context, newToken *oauth2.Token) error {
+//	            return saveNewToken(newToken)
+//	        }),
+//	        WithAuthError(ErrCustomAuth),
+//	    ),
+//	)
 func WithOAuth2Http(
 	ctx context.Context,
 	currentToken *oauth2.Token,
@@ -165,24 +198,71 @@ func WithOAuth2Http(
 
 type OAuth2HttpOption func(t *OAuth2Core)
 
+// WithOnRefreshTokenChange sets a callback that is triggered when the refresh token changes.
+// This is useful for persisting the new token for future use.
+// If the callback returns an error, the request will fail with ErrAuthenticationInvalid
+// (if configured) or the original error.
+//
+// Example:
+//
+//	WithOnRefreshTokenChange(func(ctx context.Context, newToken *oauth2.Token) error {
+//	    return db.SaveToken(newToken)
+//	})
 func WithOnRefreshTokenChange(onRefreshTokenChange func(ctx context.Context, newToken *oauth2.Token) error) OAuth2HttpOption {
 	return func(t *OAuth2Core) {
 		t.OnRefreshTokenChange = onRefreshTokenChange
 	}
 }
 
+// WithOnAuthError sets a callback that is triggered when any authentication error occurs.
+// This includes token refresh failures, OnRefreshTokenChange errors, and 401/403 responses.
+// The callback receives the token that was used in the failed request and the error that occurred.
+//
+// This is useful for logging authentication failures or updating metrics.
+// The callback is called before returning ErrAuthenticationInvalid (if configured).
+//
+// Example:
+//
+//	WithOnAuthError(func(ctx context.Context, oldToken *oauth2.Token, err error) {
+//	    log.Printf("Auth failed for user %v: %v", oldToken.AccessToken, err)
+//	    metrics.AuthFailures.Inc()
+//	})
 func WithOnAuthError(onRefreshTokenFailed func(ctx context.Context, oldToken *oauth2.Token, refreshErr error)) OAuth2HttpOption {
 	return func(t *OAuth2Core) {
 		t.OnAuthError = onRefreshTokenFailed
 	}
 }
 
+// WithAuthError configures the error that will be returned for all authentication failures.
+// When set, this error will be returned instead of the original error for:
+// - Token refresh failures
+// - OnRefreshTokenChange callback errors
+// - 401/403 responses from the server
+//
+// If not set, the original error will be returned.
+//
+// Example:
+//
+//	var ErrAuthExpired = errors.New("authentication expired")
+//	client := NewXClient(WithOAuth2Http(ctx, token, source,
+//	    WithAuthError(ErrAuthExpired),
+//	))
 func WithAuthError(err error) OAuth2HttpOption {
 	return func(t *OAuth2Core) {
 		t.ErrAuthenticationInvalid = err
 	}
 }
 
+// WithRecordError sets a callback for recording internal errors that occur during
+// authentication but don't affect the request outcome.
+// Currently this is only used for errors that occur while reading the response body
+// of a failed authentication attempt.
+//
+// Example:
+//
+//	WithRecordError(func(ctx context.Context, err error) {
+//	    log.Printf("Internal oauth error: %v", err)
+//	})
 func WithRecordError(onRecordError func(ctx context.Context, err error)) OAuth2HttpOption {
 	return func(t *OAuth2Core) {
 		t.OnRecordError = onRecordError

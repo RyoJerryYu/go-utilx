@@ -2,6 +2,10 @@ package setx
 
 import "github.com/RyoJerryYu/go-utilx/pkg/container/icontainer"
 
+// This file defines type aliases and constructors for common set types.
+// Each type alias is a specialized version of Set[T] for a specific type.
+// Each New* function creates an empty set of the corresponding type.
+
 type (
 	BoolSet       = Set[bool]
 	StrSet        = Set[string]

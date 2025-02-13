@@ -7,6 +7,30 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// JsonConvert converts between two types using JSON marshaling and unmarshaling.
+// It handles special cases for json.Marshaler/Unmarshaler and protobuf messages.
+//
+// The function will:
+// 1. Marshal the input based on its type:
+//   - json.Marshaler: uses MarshalJSON()
+//   - proto.Message: uses protojson.Marshal()
+//   - others: uses json.Marshal()
+//
+// 2. Unmarshal the JSON bytes into the output based on its type:
+//   - json.Unmarshaler: uses UnmarshalJSON()
+//   - proto.Message: uses protojson.Unmarshal()
+//   - others: uses json.Unmarshal()
+//
+// Example usage:
+//
+//	type User struct {
+//	    Name string `json:"name"`
+//	    Age  int    `json:"age"`
+//	}
+//
+//	in := User{Name: "John", Age: 30}
+//	var out map[string]interface{}
+//	err := JsonConvert(in, &out)
 func JsonConvert(in any, out any) error {
 	var (
 		b   []byte

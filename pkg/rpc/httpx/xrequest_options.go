@@ -15,6 +15,16 @@ type xRequestOpts struct {
 
 type XRequestOption func(*xRequestOpts)
 
+// WithQuerys adds multiple query parameters to the request URL.
+// If the URL already has query parameters, they will be preserved.
+//
+// Example:
+//
+//	params := url.Values{}
+//	params.Set("page", "1")
+//	params.Set("limit", "10")
+//	resp, err := client.Get(ctx, "https://api.example.com/users",
+//	    WithQuerys(params))
 func WithQuerys(queryParams url.Values) XRequestOption {
 	return func(sgc *xRequestOpts) {
 		sgc.addApplyRequest(func(r *http.Request) {
@@ -33,6 +43,16 @@ func WithQuery(key string, value string) XRequestOption {
 	}
 }
 
+// WithHeaders adds multiple headers to the request.
+// If a header already exists, its value will be replaced.
+//
+// Example:
+//
+//	resp, err := client.Get(ctx, "https://api.example.com/users",
+//	    WithHeaders(map[string]string{
+//	        "X-API-Key": "secret",
+//	        "Accept": "application/json",
+//	    }))
 func WithHeaders(headers map[string]string) XRequestOption {
 	return func(sgc *xRequestOpts) {
 		sgc.addApplyRequest(func(r *http.Request) {
