@@ -47,6 +47,14 @@ func WithoutDefaultOption() XClientOption {
 	})
 }
 
+// WithOtel adds OpenTelemetry instrumentation to the client.
+// By default, it formats span names as "METHOD HOST" (e.g., "GET api.example.com").
+//
+// Example:
+//
+//	client := NewXClient(WithOtel(
+//	    otelhttp.WithPropagators(propagation.TraceContext{}),
+//	))
 func WithOtel(opts ...otelhttp.Option) ClientOption {
 	return func(httpCli *http.Client) *http.Client {
 		defaultOpts := []otelhttp.Option{
@@ -62,6 +70,12 @@ func WithOtel(opts ...otelhttp.Option) ClientOption {
 	}
 }
 
+// WithBearerAuth adds Bearer token authentication to all requests made by the client.
+// The token will be added in the Authorization header as "Bearer <token>".
+//
+// Example:
+//
+//	client := NewXClient(WithBearerAuth("your-token-here"))
 func WithBearerAuth(token string) ClientOption {
 	return func(cli *http.Client) *http.Client {
 		cli.Transport = NewAuthTransport(cli.Transport, "Bearer", token)
@@ -93,6 +107,15 @@ func (e *XError) Error() string {
 	return fmt.Sprintf("httpx %s error %d: %s", e.Method, e.Code, e.Body)
 }
 
+// WithReturnErrorIfNot2xx wraps the client to return an error for any non-2xx response.
+// The error will contain the response status code and body.
+// Note: When this option returns an error, it will close the response body automatically.
+//
+// Example:
+//
+//	client := NewXClient(WithReturnErrorIfNot2xx())
+//	_, err := client.Get(ctx, "https://api.example.com/notfound")
+//	// err will be *XError with Code=404
 func WithReturnErrorIfNot2xx() ClientDecorator {
 	return func(inner Client) Client {
 		return ClientFunc(func(req *http.Request) (*http.Response, error) {
