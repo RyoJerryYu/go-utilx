@@ -105,6 +105,12 @@ func MakeSSHClient(user, host string, opts ...SSHClientOption) (*ssh.Client, err
 			return nil, err
 		}
 	}
+	if len(cfg.auth) == 0 {
+		err := WithDefaultAuth()(cfg)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return makeSSHClientWithCustom(user, host, cfg)
 }
 
