@@ -72,7 +72,7 @@ func (s *SshRunner) Run(ctx context.Context, cmd string) (string, error) {
 	stderr := bytes.Buffer{}
 	session.Stderr = &stderr
 
-	output, err := session.CombinedOutput(cmd)
+	output, err := session.Output(cmd)
 	if stderr.Len() > 0 {
 		log.Warnf(ctx, "run with stderr: %s", stderr.String())
 	}
