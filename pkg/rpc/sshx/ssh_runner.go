@@ -130,10 +130,15 @@ func (s *SshRunner) UpdateScript(ctx context.Context, scriptPath string, scriptD
 	}
 	defer session.Close()
 
+	stderr := bytes.Buffer{}
 	session.Stdin = bytes.NewBuffer(scriptData)
+	session.Stderr = &stderr
 
 	cmd := fmt.Sprintf("cat > %s && chmod +x %s && echo %s", scriptPath, scriptPath, success)
 	output, err := session.Output(cmd)
+	if stderr.Len() > 0 {
+		log.Warnf(ctx, "update script with stderr: %s", stderr.String())
+	}
 	if err != nil {
 		log.Errorf(ctx, "update script failed: %v", err)
 		return err
@@ -167,9 +172,14 @@ func (s *SshRunner) UploadFile(ctx context.Context, filePath string, fileData []
 	}
 	defer session.Close()
 
+	stderr := bytes.Buffer{}
 	session.Stdin = bytes.NewBuffer(fileData)
+	session.Stderr = &stderr
 
-	output, err := session.CombinedOutput(fmt.Sprintf("cat > %s && echo %s", filePath, success))
+	output, err := session.Output(fmt.Sprintf("cat > %s && echo %s", filePath, success))
+	if stderr.Len() > 0 {
+		log.Warnf(ctx, "update script with stderr: %s", stderr.String())
+	}
 	if err != nil {
 		log.Errorf(ctx, "upload file failed: %v", err)
 		return err
@@ -203,7 +213,13 @@ func (s *SshRunner) DownloadFile(ctx context.Context, filePath string) ([]byte, 
 	}
 	defer session.Close()
 
-	output, err := session.CombinedOutput(fmt.Sprintf("cat %s", filePath))
+	stderr := bytes.Buffer{}
+	session.Stderr = &stderr
+
+	output, err := session.Output(fmt.Sprintf("cat %s", filePath))
+	if stderr.Len() > 0 {
+		log.Warnf(ctx, "download file with stderr: %s", stderr.String())
+	}
 	if err != nil {
 		log.Errorf(ctx, "download file failed: %v", err)
 		return []byte(""), err
