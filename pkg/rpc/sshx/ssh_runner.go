@@ -62,14 +62,20 @@ func NewSshRunnerWithClient(sshClient *ssh.Client) *SshRunner {
 //
 //	output, err := runner.Run("ls -la")
 //	// output contains both stdout and stderr from the 'ls -la' command
-func (s *SshRunner) Run(cmd string) (string, error) {
+func (s *SshRunner) Run(ctx context.Context, cmd string) (string, error) {
 	session, err := s.sshClient.NewSession()
 	if err != nil {
 		return "", err
 	}
 	defer session.Close()
 
+	stderr := bytes.Buffer{}
+	session.Stderr = &stderr
+
 	output, err := session.CombinedOutput(cmd)
+	if stderr.Len() > 0 {
+		log.Warnf(ctx, "run with stderr: %s", stderr.String())
+	}
 	return string(output), err
 }
 
@@ -83,7 +89,7 @@ func (s *SshRunner) Run(cmd string) (string, error) {
 //	err := runner.RunLog("ls -la", &stdout, &stderr)
 //	// stdout contains standard output
 //	// stderr contains error output
-func (s *SshRunner) RunLog(cmd string, stdOut, stdErr io.Writer) error {
+func (s *SshRunner) RunLog(ctx context.Context, cmd string, stdOut, stdErr io.Writer) error {
 	session, err := s.sshClient.NewSession()
 	if err != nil {
 		return err
