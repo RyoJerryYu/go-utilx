@@ -76,6 +76,62 @@ func MapByNames[Name comparable, T NameGetable[Name]](s []T) map[Name]T {
 	return slicex.MapBy(s, T.GetName)
 }
 
+// FilterBy filters a slice of elements based on a set of values.
+// The filter function returns true if the element should be included in the result.
+// Example:
+//
+//	type User struct{ id int }
+//	func (u User) GetId() int { return u.id }
+//	users := []User{{1}, {2}, {3}}
+//	filtered := FilterBy(users, User.GetId, 1, 3)
+//	// filtered = []User{{1}, {3}}
+func FilterBy[T any, By comparable](s []T, by func(T) By, values ...By) []T {
+	valueSet := slicex.ToSet(values)
+	return slicex.Filter(s, func(t T) bool {
+		_, ok := valueSet[by(t)]
+		return ok
+	})
+}
+
+// FilterByIds filters a slice of elements based on a set of IDs.
+// The filter function returns true if the element should be included in the result.
+// Example:
+//
+//	type User struct{ id int }
+//	func (u User) GetId() int { return u.id }
+//	users := []User{{1}, {2}, {3}}
+//	filtered := FilterByIds(users, 1, 3)
+//	// filtered = []User{{1}, {3}}
+func FilterByIds[ID comparable, T IdGetable[ID]](s []T, ids ...ID) []T {
+	return FilterBy(s, T.GetId, ids...)
+}
+
+// FilterByNames filters a slice of elements based on a set of names.
+// The filter function returns true if the element should be included in the result.
+// Example:
+//
+//	type User struct{ name string }
+//	func (u User) GetName() string { return u.name }
+//	users := []User{{"Alice"}, {"Bob"}, {"Charlie"}}
+//	filtered := FilterByNames(users, "Alice", "Charlie")
+//	// filtered = []User{{"Alice"}, {"Charlie"}}
+func FilterByNames[Name comparable, T NameGetable[Name]](s []T, names ...Name) []T {
+	return FilterBy(s, T.GetName, names...)
+}
+
+// FilterByPids filters a slice of elements based on a set of parent IDs.
+// The filter function returns true if the element should be included in the result.
+// Example:
+//
+//	type Node struct{ pid int }
+//	func (n Node) GetPid() int { return n.pid }
+//	nodes := []Node{{1}, {2}, {2}}
+//	filtered := FilterByPids(nodes, 1, 2)
+//	// filtered = []Node{{1}, {2}}
+func FilterByPids[PID comparable, T PiddGetable[PID]](s []T, pids ...PID) []T {
+	return FilterBy(s, T.GetPid, pids...)
+}
+
 // GroupByPids groups elements by their parent IDs.
 // Elements with the same parent ID will be grouped together in a slice.
 // Example:
