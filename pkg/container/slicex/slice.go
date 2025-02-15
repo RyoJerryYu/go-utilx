@@ -13,6 +13,7 @@ func SliceFromValue[T comparable, V comparable](in map[T]V) Slice[V] { return Fr
 func SliceFromSet[T comparable](in map[T]struct{}) Slice[T]          { return FromSet(in) }
 func SliceFrom[T comparable](in ...T) Slice[T]                       { return From(in...) }
 func (s Slice[T]) ToSet() map[T]struct{}                             { return ToSet(s) }
+func (s Slice[T]) Filter(fn func(T) bool) Slice[T]                   { return Filter(s, fn) }
 
 //////
 // Operator

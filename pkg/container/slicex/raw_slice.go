@@ -102,6 +102,16 @@ func ForEach[T any](in []T, fn func(T)) {
 	}
 }
 
+func Filter[T any](in []T, fn func(T) bool) []T {
+	out := make([]T, 0, len(in))
+	for _, v := range in {
+		if fn(v) {
+			out = append(out, v)
+		}
+	}
+	return out
+}
+
 // Intersect returns a new slice containing elements that exist in both slices.
 // The order of elements in the result follows the order in slice a.
 // Example:
