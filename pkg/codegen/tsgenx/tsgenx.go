@@ -42,27 +42,30 @@ func (g *TSFileBuf) Write(p []byte) (n int, err error) {
 }
 
 func (g *TSFileBuf) P(v ...any) {
-	for _, x := range v {
-		switch x := x.(type) {
-		case TSIdent:
-			fmt.Fprint(&g.buf, g.QualifiedTSIdent(x))
-		default:
-			fmt.Fprint(&g.buf, x)
-		}
+	newV := g.pConv(v...)
+	for _, x := range newV {
+		fmt.Fprint(&g.buf, x)
 	}
 	fmt.Fprintln(&g.buf)
 }
 
 // Pf is same as P, but with formatted string.
-func (opt *TSFileBuf) Pf(format string, v ...any) {
+func (g *TSFileBuf) Pf(format string, v ...any) {
+	newV := g.pConv(v...)
+	g.P(fmt.Sprintf(format, newV...))
+}
+
+func (g *TSFileBuf) pConv(v ...any) []any {
 	newV := make([]any, len(v))
 	for i, x := range v {
 		switch x := x.(type) {
 		case TSIdent:
-			newV[i] = opt.QualifiedTSIdent(x)
+			newV[i] = g.QualifiedTSIdent(x)
+		case Comments:
+			newV[i] = x.String()
 		default:
 			newV[i] = x
 		}
 	}
-	opt.P(fmt.Sprintf(format, newV...))
+	return newV
 }

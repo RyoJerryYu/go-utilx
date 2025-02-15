@@ -39,7 +39,6 @@ func (m TSIdent) GetName() string {
 }
 
 func (r *TSFileBuf) QualifiedTSIdent(ident TSIdent) string {
-	// glog.V(3).Infof("QualifiedTSIdent: %s", m.GoIdent.GoName)
 	if _, ok := r.ImportIdents[ident.Path]; !ok {
 		r.ImportIdents[ident.Path] = []TSIdent{}
 	}
