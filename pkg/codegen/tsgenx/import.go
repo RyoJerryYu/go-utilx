@@ -38,6 +38,15 @@ func (m TSIdent) GetName() string {
 	return m.Name
 }
 
+func (r *TSFileBuf) QualifiedTSIdent(ident TSIdent) string {
+	// glog.V(3).Infof("QualifiedTSIdent: %s", m.GoIdent.GoName)
+	if _, ok := r.ImportIdents[ident.Path]; !ok {
+		r.ImportIdents[ident.Path] = []TSIdent{}
+	}
+	r.ImportIdents[ident.Path] = append(r.ImportIdents[ident.Path], ident)
+	return ident.Name
+}
+
 func tsRelativeImportPath(thisPath string, modulePath string) (string, bool) {
 	thisDir := filepath.Dir(thisPath)
 	relativePath, err := filepath.Rel(thisDir, modulePath)
@@ -49,6 +58,7 @@ func tsRelativeImportPath(thisPath string, modulePath string) (string, bool) {
 	}
 	return strings.TrimSuffix(relativePath, ".ts"), true
 }
+
 func (g *TSFileBuf) thisModulePath() string {
 	return g.Opts.GenFilePath
 }

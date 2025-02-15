@@ -3,6 +3,7 @@ package gogenx
 import (
 	"fmt"
 	"go/token"
+	"path"
 	"sort"
 	"strings"
 	"unicode"
@@ -24,6 +25,22 @@ func (m GoImportPath) Ident(name string) GoIdent {
 }
 
 type GoPackageName string
+
+func (g *GoFileBuf) QualifiedGoIdent(ident GoIdent) string {
+	if ident.GoImportPath == g.Opts.GenFileImportPath {
+		return ident.Name
+	}
+	if packageName, ok := g.packageNames[ident.GoImportPath]; ok {
+		return fmt.Sprintf("%s.%s", packageName, ident.Name)
+	}
+	packageName := cleanPackageName(path.Base(string(ident.GoImportPath)))
+	for i, orig := 1, packageName; g.usedPackageNames[packageName]; i++ {
+		packageName = GoPackageName(fmt.Sprintf("%s%d", orig, i))
+	}
+	g.packageNames[ident.GoImportPath] = packageName
+	g.usedPackageNames[packageName] = true
+	return fmt.Sprintf("%s.%s", packageName, ident.Name)
+}
 
 // goSanitized converts a string to a valid Go identifier.
 func goSanitized(s string) string {

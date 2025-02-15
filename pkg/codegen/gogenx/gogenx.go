@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"path"
 	"strings"
 )
 
@@ -38,20 +37,4 @@ func (g *GoFileBuf) Apply(w io.Writer) error {
 	res := fmt.Sprintf("%s\n\n%s", imports, content)
 	_, err := w.Write([]byte(res))
 	return err
-}
-
-func (g *GoFileBuf) QualifiedGoIdent(ident GoIdent) string {
-	if ident.GoImportPath == g.Opts.GenFileImportPath {
-		return ident.Name
-	}
-	if packageName, ok := g.packageNames[ident.GoImportPath]; ok {
-		return fmt.Sprintf("%s.%s", packageName, ident.Name)
-	}
-	packageName := cleanPackageName(path.Base(string(ident.GoImportPath)))
-	for i, orig := 1, packageName; g.usedPackageNames[packageName]; i++ {
-		packageName = GoPackageName(fmt.Sprintf("%s%d", orig, i))
-	}
-	g.packageNames[ident.GoImportPath] = packageName
-	g.usedPackageNames[packageName] = true
-	return fmt.Sprintf("%s.%s", packageName, ident.Name)
 }

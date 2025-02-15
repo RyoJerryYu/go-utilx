@@ -66,12 +66,3 @@ func (opt *TSFileBuf) Pf(format string, v ...any) {
 	}
 	opt.P(fmt.Sprintf(format, newV...))
 }
-
-func (r *TSFileBuf) QualifiedTSIdent(ident TSIdent) string {
-	// glog.V(3).Infof("QualifiedTSIdent: %s", m.GoIdent.GoName)
-	if _, ok := r.ImportIdents[ident.Path]; !ok {
-		r.ImportIdents[ident.Path] = []TSIdent{}
-	}
-	r.ImportIdents[ident.Path] = append(r.ImportIdents[ident.Path], ident)
-	return ident.Name
-}
