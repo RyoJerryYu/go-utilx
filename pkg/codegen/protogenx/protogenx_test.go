@@ -16,6 +16,7 @@ func TestProtoFileBuf(t *testing.T) {
 	f.Pf("test %s", "test")
 
 	f.P(ProtoIdent{ProtoImport: ProtoImport{ProtoPackage: "schemax.schema.v1.test", ImportPath: "schemax/schema/v1/test.proto"}, Name: "Message"})
+	f.P(Comments("test"))
 
 	res := bytes.NewBufferString("")
 	f.Apply(res)
@@ -29,6 +30,7 @@ import "schemax/schema/v1/test.proto";
 test
 test test
 schemax.schema.v1.test.Message
+// test
 
 
 `, res.String())
