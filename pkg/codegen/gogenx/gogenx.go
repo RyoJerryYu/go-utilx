@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"path"
 	"strings"
 )
 
@@ -40,18 +39,35 @@ func (g *GoFileBuf) Apply(w io.Writer) error {
 	return err
 }
 
-func (g *GoFileBuf) QualifiedGoIdent(ident GoIdent) string {
-	if ident.GoImportPath == g.Opts.GenFileImportPath {
-		return ident.Name
+func (g *GoFileBuf) Write(p []byte) (n int, err error) {
+	return g.buf.Write(p)
+}
+
+func (g *GoFileBuf) P(v ...any) {
+	newV := g.pConv(v...)
+	for _, x := range newV {
+		fmt.Fprint(&g.buf, x)
 	}
-	if packageName, ok := g.packageNames[ident.GoImportPath]; ok {
-		return fmt.Sprintf("%s.%s", packageName, ident.Name)
+	fmt.Fprintln(&g.buf)
+}
+
+func (g *GoFileBuf) Pf(format string, v ...any) {
+	newV := g.pConv(v...)
+	fmt.Fprintf(&g.buf, format, newV...)
+	fmt.Fprintln(&g.buf)
+}
+
+func (g *GoFileBuf) pConv(v ...any) []any {
+	newV := make([]any, len(v))
+	for i, x := range v {
+		switch x := x.(type) {
+		case GoIdent:
+			newV[i] = g.QualifiedGoIdent(x)
+		case Comments:
+			newV[i] = x.String()
+		default:
+			newV[i] = x
+		}
 	}
-	packageName := cleanPackageName(path.Base(string(ident.GoImportPath)))
-	for i, orig := 1, packageName; g.usedPackageNames[packageName]; i++ {
-		packageName = GoPackageName(fmt.Sprintf("%s%d", orig, i))
-	}
-	g.packageNames[ident.GoImportPath] = packageName
-	g.usedPackageNames[packageName] = true
-	return fmt.Sprintf("%s.%s", packageName, ident.Name)
+	return newV
 }
