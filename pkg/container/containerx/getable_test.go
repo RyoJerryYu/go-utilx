@@ -22,6 +22,10 @@ func (e StringIdEntity) GetId() string {
 	return e.Id
 }
 
+func (e StringIdEntity) GetName() string {
+	return e.Id
+}
+
 func TestToId(t *testing.T) {
 	entities := []Int64IdEntity{{Id: 1}, {Id: 2}, {Id: 3}}
 	ids := ToIds(entities)
@@ -40,4 +44,22 @@ func TestMapById(t *testing.T) {
 	entities2 := []StringIdEntity{{Id: "1"}, {Id: "2"}, {Id: "3"}}
 	m2 := MapByIds(entities2)
 	assert.Equal(t, map[string]StringIdEntity{"1": {Id: "1"}, "2": {Id: "2"}, "3": {Id: "3"}}, m2)
+}
+
+func TestFilterByIds(t *testing.T) {
+	entities := []Int64IdEntity{{Id: 1}, {Id: 2}, {Id: 3}}
+	filtered := FilterByIds(entities, 1, 3)
+	assert.Equal(t, []Int64IdEntity{{Id: 1}, {Id: 3}}, filtered)
+}
+
+func TestGroupByNames(t *testing.T) {
+	entities := []StringIdEntity{{Id: "1"}, {Id: "2"}, {Id: "3"}}
+	groups := GroupByNames(entities)
+	assert.Equal(t, map[string][]StringIdEntity{"1": {{Id: "1"}}, "2": {{Id: "2"}}, "3": {{Id: "3"}}}, groups)
+}
+
+func TestChunkByIds(t *testing.T) {
+	entities := []Int64IdEntity{{Id: 1}, {Id: 2}, {Id: 3}}
+	chunks := ChunkByIds(entities)
+	assert.Equal(t, [][]Int64IdEntity{{{Id: 1}}, {{Id: 2}}, {{Id: 3}}}, chunks)
 }
