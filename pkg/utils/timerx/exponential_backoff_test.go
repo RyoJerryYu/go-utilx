@@ -9,13 +9,13 @@ import (
 
 func TestExponentialBackoff(t *testing.T) {
 	t.Run("initial delay", func(t *testing.T) {
-		eb := NewExponentialBackoff(10*time.Second, 5, 100*time.Millisecond, 1*time.Second)
+		eb := NewExponentialBackoff(5, 100*time.Millisecond, 1*time.Second)
 		delay := eb.Next()
 		require.Equal(t, delay, 100*time.Millisecond)
 	})
 
 	t.Run("exponential growth", func(t *testing.T) {
-		eb := NewExponentialBackoff(10*time.Second, 5, 100*time.Millisecond, 1*time.Second)
+		eb := NewExponentialBackoff(5, 100*time.Millisecond, 1*time.Second)
 		expected := []time.Duration{
 			100 * time.Millisecond,
 			200 * time.Millisecond,
@@ -31,7 +31,7 @@ func TestExponentialBackoff(t *testing.T) {
 	})
 
 	t.Run("reset", func(t *testing.T) {
-		eb := NewExponentialBackoff(10*time.Second, 5, 100*time.Millisecond, 1*time.Second)
+		eb := NewExponentialBackoff(5, 100*time.Millisecond, 1*time.Second)
 		eb.Next() // 100ms
 		eb.Next() // 200ms
 		eb.Reset()
@@ -41,7 +41,7 @@ func TestExponentialBackoff(t *testing.T) {
 	})
 
 	t.Run("clone", func(t *testing.T) {
-		eb := NewExponentialBackoff(10*time.Second, 5, 100*time.Millisecond, 1*time.Second)
+		eb := NewExponentialBackoff(5, 100*time.Millisecond, 1*time.Second)
 		cloneIface := eb.Clone()
 		clone, ok := cloneIface.(*ExponentialBackoff)
 		require.True(t, ok)
