@@ -10,7 +10,7 @@ type ExponentialBackoff struct {
 	nextDelay      time.Duration
 }
 
-func NewExponentialBackoff(maxElapsedTime time.Duration, maxAttempts int, initialDelay time.Duration, maxDelay time.Duration) *ExponentialBackoff {
+func NewExponentialBackoff(maxAttempts int, initialDelay time.Duration, maxDelay time.Duration) *ExponentialBackoff {
 	return &ExponentialBackoff{
 		MaxAttempts:  maxAttempts,
 		InitialDelay: initialDelay,
