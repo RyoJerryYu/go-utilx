@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -45,6 +46,18 @@ func WithoutDefaultOption() XClientOption {
 	return XClientOptionFunc(func(scc *xClientConfig) {
 		scc.withoutDefaultOption = true
 	})
+}
+
+// WithTimeout sets the timeout for all requests made by the client.
+//
+// Example:
+//
+//	client := NewXClient(WithTimeout(5 * time.Second))
+func WithTimeout(timeout time.Duration) ClientOption {
+	return func(c *http.Client) *http.Client {
+		c.Timeout = timeout
+		return c
+	}
 }
 
 // WithOtel adds OpenTelemetry instrumentation to the client.
