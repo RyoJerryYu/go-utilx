@@ -74,6 +74,7 @@ func WithOtel(opts ...otelhttp.Option) ClientOption {
 			otelhttp.WithSpanNameFormatter(func(operation string, r *http.Request) string {
 				return r.Method + " " + r.URL.Host
 			}),
+			otelhttp.WithMessageEvents(otelhttp.ReadEvents, otelhttp.WriteEvents),
 		}
 
 		opts = append(defaultOpts, opts...)
