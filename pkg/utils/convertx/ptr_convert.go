@@ -20,3 +20,4 @@ func Float64Ptr(f float64) *float64          { return &f }
 func Complex64Ptr(c complex64) *complex64    { return &c }
 func Complex128Ptr(c complex128) *complex128 { return &c }
 func AnyPtr(a any) *any                      { return &a }
+func Ptr[T any](a T) *T                      { return &a }
