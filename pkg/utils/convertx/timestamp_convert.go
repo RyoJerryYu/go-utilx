@@ -61,18 +61,18 @@ func TimePtr2Sql(in *time.Time) sql.NullTime {
 	}
 }
 
-// TimePb2GoTime converts a protobuf timestamp to a time.Time.
+// TimePb2Go converts a protobuf timestamp to a time.Time.
 // It will ensure the null timestamp is converted to the zero value of time.Time.
-func TimePb2GoTime(in *timestamppb.Timestamp) time.Time {
+func TimePb2Go(in *timestamppb.Timestamp) time.Time {
 	if in == nil {
 		return time.Time{}
 	}
 	return in.AsTime()
 }
 
-// TimeGoTime2Pb converts a time.Time to a protobuf timestamp.
+// TimeGo2Pb converts a time.Time to a protobuf timestamp.
 // It will ensure the zero value of time.Time is converted to the null timestamp.
-func TimeGoTime2Pb(in time.Time) *timestamppb.Timestamp {
+func TimeGo2Pb(in time.Time) *timestamppb.Timestamp {
 	if in.IsZero() {
 		return nil
 	}
